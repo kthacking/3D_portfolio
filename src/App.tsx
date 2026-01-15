@@ -20,7 +20,7 @@ function App() {
 
       {/* Fixed 3D Background */}
       <div className="fixed inset-0 z-0">
-        <Canvas gl={{ antialias: false, stencil: false, depth: true }} dpr={[1, 1.5]}>
+        <Canvas gl={{ antialias: false, stencil: false, depth: true }} dpr={[1, 2]}>
           <Suspense fallback={null}>
             <Experience />
             <Preload all />

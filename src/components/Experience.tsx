@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { useScroll, useMotionValueEvent } from 'framer-motion';
-import { Image, Float, Text } from '@react-three/drei';
+import { Image, Float } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import GridFloor from './GridFloor';
 import BackgroundParticles from './BackgroundParticles';
@@ -19,7 +19,7 @@ const Experience: React.FC = () => {
     const avatarGroup = useRef<THREE.Group>(null);
     const philosophyChain = useRef<THREE.Group>(null);
 
-    useFrame((state) => {
+    useFrame((state, delta) => {
         // Use the native scroll progress ref
         const offset = scrollProgress.current;
 
@@ -29,8 +29,10 @@ const Experience: React.FC = () => {
         // Map 0..1 to Y position. Start at 5, go down to maybe -40?
         const targetY = 5 - (offset * 60);
 
-        // Smooth camera movement
-        state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, 0.05);
+        // Smooth camera movement (Frame-rate independent damping)
+        // A damping factor of ~4-5 gives a smooth, high-quality feel
+        const step = 1 - Math.exp(-4 * delta);
+        state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, step);
 
         // --- Hero Animation ---
         if (avatarGroup.current) {
@@ -109,16 +111,7 @@ const Experience: React.FC = () => {
                         <meshStandardMaterial color="#c0c0c0" metalness={1} roughness={0.2} />
                     </mesh>
                 ))}
-                <Text
-                    position={[0, -2, 0.5]}
-                    fontSize={0.5}
-                    color="white"
-                    font="https://fonts.gstatic.com/s/orbitron/v29/yMJRMIlzdpvBhQQL_Qq7dys.woff"
-                    anchorX="center"
-                    anchorY="middle"
-                >
-                    LEARNING
-                </Text>
+
             </group>
 
             {/* --- SCENE 3: MINIMALISM (Visible at scroll ~35%) --- */}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import GlassCard from './GlassCard';
 
 const Philosophy: React.FC = () => {
     return (
@@ -22,8 +23,8 @@ const Philosophy: React.FC = () => {
           We just provide the space and surrounding text 
       */}
             {/* Transparent container for 3D elements */}
-            <div className="h-[400px] w-full max-w-2xl mx-auto flex items-center justify-center relative">
-                
+            <div className="w-full max-w-2xl mx-auto flex items-center justify-center relative z-20">
+                <GlassCard />
             </div>
 
             <motion.div
