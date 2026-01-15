@@ -46,9 +46,9 @@ const GridFloor: React.FC = () => {
       // Glow color
       vec3 glowColor = vec3(0.0, 0.4, 1.0); // Electric Blue
       
-      // Distance fade (Fog)
+      // Distance fade (Fog) - Fade out sooner to prevent horizon aliasing/clutter
       float dist = length(vPos.xy);
-      float alpha = 1.0 - smoothstep(10.0, 50.0, dist);
+      float alpha = 1.0 - smoothstep(15.0, 45.0, dist);
       
       // Pulsing effect
       float pulse = (sin(uTime * 2.0) * 0.5 + 0.5) * 0.5 + 0.5;
@@ -63,15 +63,17 @@ const GridFloor: React.FC = () => {
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
     }
-    // Keep grid floor relatively under the camera, but maybe parallaxed?
-    // If camera Y goes to -100, floor at -2 is 98 units away (fog will hide it completely).
-    // We should move the floor so it's always at camera.y - 7
+    // Keep grid floor relatively under the camera
+    // We update this AFTER camera movement (priority 1) to avoid jitter/lag
     if (meshRef.current) {
-      meshRef.current.position.y = state.camera.position.y - 7;
-      meshRef.current.position.x = state.camera.position.x;
-      meshRef.current.position.z = state.camera.position.z;
+      // Logic removed: User wants grid ONLY in Home section.
+      // By not updating position, it stays at [0, -2, 0] and the camera will scroll past it (moving down),
+      // effectively making the grid "move up" out of view.
+      // meshRef.current.position.y = state.camera.position.y - 7;
+      // meshRef.current.position.x = state.camera.position.x;
+      // meshRef.current.position.z = state.camera.position.z;
     }
-  });
+  }, 1); // Priority 1 ensures this runs after the main camera update logic (usually priority 0)
 
   return (
     <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]}>

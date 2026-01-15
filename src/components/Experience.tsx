@@ -67,15 +67,8 @@ const Experience: React.FC = () => {
             <directionalLight position={[5, 10, 5]} intensity={1} castShadow />
             <pointLight position={[-5, 5, -5]} intensity={0.5} color="#0066ff" />
 
-            {/* Persistent Grid Floor - follows camera XZ but Y is fixed */}
+            {/* Static Grid Floor - Only visible in Home/Hero section */}
             <group position={[0, -2, 0]}>
-                {/* We might need to move grid floor with camera if we want infinite floor illusion vertically? 
-                    Actually, grid shader handles infinite look. 
-                    But if camera goes to Y=-50, floor at -2 is far above.
-                    We should probably attach floor to camera Y but offset it?
-                    Or just have one huge floor?
-                    Let's bind floor to camera position for now to keep it "under feet"
-                */}
                 <GridFloor />
             </group>
 
