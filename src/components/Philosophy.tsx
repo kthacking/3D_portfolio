@@ -19,7 +19,7 @@ const Philosophy: React.FC = () => {
             </motion.div>
 
             {/* Center visual handled by 3D layer (the Chain and Card) 
-          We just provide the  space and surrounding text 
+          We just provide the space and surrounding text 
       */}
             {/* Transparent container for 3D elements */}
             <div className="h-[400px] w-full max-w-2xl mx-auto flex items-center justify-center relative">
