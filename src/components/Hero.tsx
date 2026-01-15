@@ -31,8 +31,8 @@ const Hero: React.FC<{ id?: string }> = ({ id }) => {
                     transition={{ duration: 0.8, delay: 0.4 }}
                     className="text-lg md:text-xl font-light text-gray-300 max-w-lg leading-relaxed border-l-2 border-neon-blue pl-4"
                 >
-                    Sparks innovation, shaping digital identity with <br />
-                    <span className="text-neon-blue font-semibold">every line of code</span>.
+                    Crafting digital experiences that <br />
+                    <span className="text-neon-blue font-semibold">speak louder than code.</span>.
                 </motion.p>
 
                 <motion.div
@@ -64,7 +64,6 @@ const Hero: React.FC<{ id?: string }> = ({ id }) => {
                 transition={{ repeat: Infinity, duration: 2 }}
                 className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2"
             >
-                <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500">Scroll to Explore</span>
                 <div className="w-[1px] h-12 bg-gradient-to-b from-neon-blue to-transparent"></div>
             </motion.div>
         </section>

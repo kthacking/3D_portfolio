@@ -23,6 +23,7 @@ const Philosophy: React.FC = () => {
       */}
             {/* Transparent container for 3D elements */}
             <div className="h-[400px] w-full max-w-2xl mx-auto flex items-center justify-center relative">
+                
             </div>
 
             <motion.div
