@@ -1,0 +1,33 @@
+import { useEffect, useState } from 'react';
+
+const KONAMI_CODE = [
+    'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',
+    'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight',
+    'b', 'a'
+];
+
+export const useKonami = () => {
+    const [activated, setActivated] = useState(false);
+    const [index, setIndex] = useState(0);
+
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === KONAMI_CODE[index]) {
+                const next = index + 1;
+                if (next === KONAMI_CODE.length) {
+                    setActivated(true);
+                    setIndex(0);
+                } else {
+                    setIndex(next);
+                }
+            } else {
+                setIndex(0);
+            }
+        };
+
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+    }, [index]);
+
+    return activated;
+};
