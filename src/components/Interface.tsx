@@ -9,7 +9,7 @@ import Timeline from './Timeline';
 import Contact from './Contact';
 
 const SectionWrapper = ({ children, className = "", id }: { children: React.ReactNode, className?: string, id?: string }) => (
-    <section id={id} className={`w-screen min-h-screen flex items-center justify-center p-4 md:p-20 relative ${className}`}>
+    <section id={id} className={`w-full min-h-screen flex items-center justify-center p-4 md:p-20 relative ${className}`}>
         <div className="w-full max-w-7xl relative z-10">
             {children}
         </div>

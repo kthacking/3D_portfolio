@@ -3,10 +3,10 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 const GridFloor: React.FC = () => {
-    const meshRef = useRef<THREE.Mesh>(null);
-    const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
+  const materialRef = useRef<THREE.ShaderMaterial>(null);
 
-    const vertexShader = `
+  const vertexShader = `
     varying vec2 vUv;
     varying vec3 vPos;
     uniform float uTime;
@@ -27,7 +27,7 @@ const GridFloor: React.FC = () => {
     }
   `;
 
-    const fragmentShader = `
+  const fragmentShader = `
     varying vec2 vUv;
     varying vec3 vPos;
     uniform float uTime;
@@ -59,27 +59,35 @@ const GridFloor: React.FC = () => {
     }
   `;
 
-    useFrame((state) => {
-        if (materialRef.current) {
-            materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
-        }
-    });
+  useFrame((state) => {
+    if (materialRef.current) {
+      materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
+    }
+    // Keep grid floor relatively under the camera, but maybe parallaxed?
+    // If camera Y goes to -100, floor at -2 is 98 units away (fog will hide it completely).
+    // We should move the floor so it's always at camera.y - 7
+    if (meshRef.current) {
+      meshRef.current.position.y = state.camera.position.y - 7;
+      meshRef.current.position.x = state.camera.position.x;
+      meshRef.current.position.z = state.camera.position.z;
+    }
+  });
 
-    return (
-        <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]}>
-            <planeGeometry args={[100, 100, 100, 100]} />
-            <shaderMaterial
-                ref={materialRef}
-                transparent
-                side={THREE.DoubleSide}
-                uniforms={{
-                    uTime: { value: 0 },
-                }}
-                vertexShader={vertexShader}
-                fragmentShader={fragmentShader}
-            />
-        </mesh>
-    );
+  return (
+    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]}>
+      <planeGeometry args={[100, 100, 100, 100]} />
+      <shaderMaterial
+        ref={materialRef}
+        transparent
+        side={THREE.DoubleSide}
+        uniforms={{
+          uTime: { value: 0 },
+        }}
+        vertexShader={vertexShader}
+        fragmentShader={fragmentShader}
+      />
+    </mesh>
+  );
 };
 
 export default GridFloor;

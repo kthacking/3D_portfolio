@@ -1,54 +1,62 @@
 import React, { useRef } from 'react';
-import { useScroll, Image, Float, Text } from '@react-three/drei';
+import { useScroll, useMotionValueEvent } from 'framer-motion';
+import { Image, Float, Text } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import GridFloor from './GridFloor';
 import BackgroundParticles from './BackgroundParticles';
 import * as THREE from 'three';
 
 const Experience: React.FC = () => {
-    const scroll = useScroll();
-    // const { viewport } = useThree(); // Unused
+    // Standard Framer Motion scroll hook (0..1)
+    const { scrollYProgress } = useScroll();
+    const scrollProgress = useRef(0);
+
+    useMotionValueEvent(scrollYProgress, "change", (latest) => {
+        scrollProgress.current = latest;
+    });
 
     // Refs for animation
     const avatarGroup = useRef<THREE.Group>(null);
     const philosophyChain = useRef<THREE.Group>(null);
 
     useFrame((state) => {
-        // Current scroll offset (0 to 1)
-        const offset = scroll.offset;
+        // Use the native scroll progress ref
+        const offset = scrollProgress.current;
 
         // --- Camera Movement ---
-        // Smoothly interpolate camera position based on scroll
-        // Hero (0) -> z=10, y=5
-        // Philosophy (0.2) -> z=10, y= -viewport.height...
-        // Actually, ScrollControls moves the HTML, we can simulate camera movement 
-        // or move the 'World' up/down. Moving world is often easier.
+        // Move camera down as we scroll.
+        // Total scroll height is roughly 8 pages.
+        // Map 0..1 to Y position. Start at 5, go down to maybe -40?
+        const targetY = 5 - (offset * 60);
 
-        // Here we will keep camera static and move the world content up
-        // But specific requirement: "Dynamic camera movement following scroll".
-        // Let's try animating camera y position:
-        // state.camera.position.y = 5 - (offset * 40); // Move down as we scroll
-
-        // But changing camera y creates parallax with the GridFloor!
-        // GridFloor is at y=-2.
-        // If we move camera down, we go through the floor.
-        // Better: Move camera Z and LookAt.
-
-        // Let's implement a 'Camera Rig' logic
-        const targetY = 5 - (offset * 50); // Just moving straight down for now
-        state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, 0.1);
+        // Smooth camera movement
+        state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, 0.05);
 
         // --- Hero Animation ---
         if (avatarGroup.current) {
             avatarGroup.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
-            // Parallax effect
-            avatarGroup.current.position.y = 1.5 + (offset * 2);
+            // Parallax effect: moves slower than camera
+            avatarGroup.current.position.y = 1.5 + (offset * 10);
         }
 
-        // --- Grid Animation ---
-        // Make grid follow camera x/z but stay at y level
-        // Grid handles its own infinite feel via shader usually, but we might need to move it 
-        // if camera moves too far.
+        // --- Philosophy Animation ---
+        // Should appear around offset 0.1 - 0.2
+        // We want it to stay in view when its HTML counterpart is there.
+        // The camera is moving down. We position objects at specific Y heights in the world.
+        // Hero is at ~1.5.
+        // If Philosophy HTML is 2nd section, it's roughly 10-15 units down in 3D space if 1 screen ~= 8 units.
+
+        // Let's rely on absolute positioning in World Space, since Camera moves down.
+        // Hero: y=0 (approx)
+        // Philosophy: y=-10
+        // Minimalism: y=-20
+        // ...
+
+        // Currently:
+        // Philosophy Group at y=-10. 
+        // Camera moves 5 -> -55.
+        // When camera is at -10, Philosophy is center.
+        // Offset 0.25 (approx) -> Y = 5 - (0.25 * 60) = -10. Perfect.
     });
 
     return (
@@ -57,26 +65,34 @@ const Experience: React.FC = () => {
             <directionalLight position={[5, 10, 5]} intensity={1} castShadow />
             <pointLight position={[-5, 5, -5]} intensity={0.5} color="#0066ff" />
 
-            {/* Persistent Grid Floor */}
-            <GridFloor />
+            {/* Persistent Grid Floor - follows camera XZ but Y is fixed */}
+            <group position={[0, -2, 0]}>
+                {/* We might need to move grid floor with camera if we want infinite floor illusion vertically? 
+                    Actually, grid shader handles infinite look. 
+                    But if camera goes to Y=-50, floor at -2 is far above.
+                    We should probably attach floor to camera Y but offset it?
+                    Or just have one huge floor?
+                    Let's bind floor to camera position for now to keep it "under feet"
+                */}
+                <GridFloor />
+            </group>
+
             <BackgroundParticles />
 
-            {/* --- SCENE 1: HERO --- */}
+            {/* --- SCENE 1: HERO (Visible at start) --- */}
             <group ref={avatarGroup} position={[3, 0, 0]}>
                 <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
-                    {/* Avatar Card */}
                     <mesh>
                         <planeGeometry args={[4, 5]} />
-                        <meshBasicMaterial transparent opacity={0.0} /> {/* Invisible click target if needed */}
+                        <meshBasicMaterial transparent opacity={0.0} />
                         <Image
                             url="/images/ref-1.png"
-                            scale={[4, 5, 1]}
+                            scale={[4, 5]}
                             opacity={0.9}
                             transparent
                             radius={0.2}
                         />
                     </mesh>
-                    {/* Glow Border */}
                     <mesh position={[0, 0, -0.1]}>
                         <planeGeometry args={[4.2, 5.2]} />
                         <meshBasicMaterial color="#0066ff" transparent opacity={0.3} />
@@ -84,9 +100,9 @@ const Experience: React.FC = () => {
                 </Float>
             </group>
 
-            {/* --- SCENE 2: PHILOSOPHY --- */}
-            <group position={[-3, -10, 0]} ref={philosophyChain}>
-                {/* 3D Chain Elements - Simplified as Tori for now */}
+            {/* --- SCENE 2: PHILOSOPHY (Visible at scroll ~20%) --- */}
+            {/* Positioned at Y = -12 to match camera descent */}
+            <group position={[-3, -12, 0]} ref={philosophyChain}>
                 {Array.from({ length: 5 }).map((_, i) => (
                     <mesh key={i} position={[0, 2 - i * 0.8, 0]} rotation={[Math.PI / 2, 0, i % 2 ? Math.PI / 2 : 0]}>
                         <torusGeometry args={[0.5, 0.1, 16, 32]} />
@@ -105,9 +121,8 @@ const Experience: React.FC = () => {
                 </Text>
             </group>
 
-            {/* --- SCENE 3: MINIMALISM --- */}
-            <group position={[0, -20, 0]}>
-                {/* Floating Cubes */}
+            {/* --- SCENE 3: MINIMALISM (Visible at scroll ~35%) --- */}
+            <group position={[0, -22, 0]}>
                 <Float speed={4} rotationIntensity={1}>
                     <mesh position={[4, 2, -2]}>
                         <boxGeometry args={[1, 1, 1]} />
@@ -120,6 +135,10 @@ const Experience: React.FC = () => {
                 </Float>
             </group>
 
+            {/* --- SCENE 4: SERVICES --- */}
+            <group position={[0, -32, 0]}>
+                {/* Add subtle background elements for services */}
+            </group>
         </>
     );
 };

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 const Hero: React.FC<{ id?: string }> = ({ id }) => {
     return (
-        <section id={id} className="w-screen h-screen flex flex-col md:flex-row items-center justify-center p-8 md:p-20 relative pointer-events-none">
+        <section id={id} className="w-full h-screen flex flex-col md:flex-row items-center justify-center p-8 md:p-20 relative pointer-events-none">
             {/* Left: Typography */}
             <div className="w-full md:w-1/2 flex flex-col items-start z-10 pointer-events-auto">
                 <motion.div
